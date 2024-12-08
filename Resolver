@@ -1,0 +1,62 @@
+-- References
+local button = script.Parent
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+local resolverEnabled = false
+
+-- Button Configuration
+button.Text = "🔍"
+button.TextScaled = true
+button.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+button.Draggable = true
+button.Position = UDim2.new(0.5, -25, 0, 10) -- Top center of the screen
+
+-- Function to toggle the resolver
+local function toggleResolver()
+    resolverEnabled = not resolverEnabled
+
+    if resolverEnabled then
+        button.Text = "✅" -- Resolver ON icon
+        print("Resolver Enabled")
+    else
+        button.Text = "🔍" -- Resolver OFF icon
+        print("Resolver Disabled")
+    end
+end
+
+-- Connect the toggle function to the button click
+button.MouseButton1Click:Connect(toggleResolver)
+
+-- Function to correct the camera if Anti-Lock is active
+local function correctCamera()
+    runService.RenderStepped:Connect(function()
+        if resolverEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local camera = workspace.CurrentCamera
+            local localHRP = player.Character.HumanoidRootPart
+
+            -- Raycast to find the player you're locking onto
+            local rayOrigin = camera.CFrame.Position
+            local rayDirection = camera.CFrame.LookVector * 1000
+            local raycastResult = workspace:Raycast(rayOrigin, rayDirection)
+
+            if raycastResult and raycastResult.Instance then
+                local hitPlayer = raycastResult.Instance.Parent
+                if hitPlayer:FindFirstChild("HumanoidRootPart") then
+                    -- Smoothly adjust the camera to focus back on the target
+                    local targetHRP = hitPlayer:FindFirstChild("HumanoidRootPart")
+                    local targetCFrame = CFrame.new(camera.CFrame.Position, targetHRP.Position)
+                    camera.CFrame = camera.CFrame:Lerp(targetCFrame, 0.2)
+                end
+            end
+        end
+    end)
+end
+
+-- Start the camera correction function
+correctCamera()
+
+-- Ensure the button persists even if the player respawns
+player.CharacterAdded:Connect(function()
+    button.Parent = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+end)
