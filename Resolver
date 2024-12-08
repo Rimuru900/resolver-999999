@@ -1,8 +1,13 @@
--- References
+-- this is a shit ass script --
+
+
 local button = script.Parent
 local player = game.Players.LocalPlayer
 local runService = game:GetService("RunService")
 local resolverEnabled = false
+
+-- Ensure ScreenGui exists before parenting the button
+local screenGui = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
 
 -- Button Configuration
 button.Text = "🔍"
@@ -60,3 +65,6 @@ correctCamera()
 player.CharacterAdded:Connect(function()
     button.Parent = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
 end)
+
+-- Parent the button to the ScreenGui when the script starts
+button.Parent = screenGui
